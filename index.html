@@ -8,46 +8,46 @@
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
+        body, html { 
+            margin:0;
+            padding:0;
+            height:100%;
+            overflow: hidden;
+         }
+        #map { 
+            position:absolute; 
+            top:0; 
+            bottom:0; 
+            left: 0;
+            right: 0;
         }
 
-        #container {
-            display: flex;
-            height: 100vh;
-            flex-direction: row;
-            align-items: stretch;
-        }
-
+        /* Floating side panel */
         #table {
-            flex-basis: 500px;
-            overflow-y: scroll;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 400px;
+            max-width: 90%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.9);
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: -3px 0 5px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 10;
+            box-sizing: border-box;
         }
 
-        #map {
-            flex-grow: 1;
+        @media (max-width: 1024px) {
+            #table { display: none; }
         }
 
-        button {
-            margin-bottom: 10px;
-        }
-        table {
-            border-collapse: collapse;
-            border-spacing: 0;
-            width: 100%;
-            border: 1px solid #ddd;
-        }
-
-        th,
-        td {
-            text-align: left;
-            padding: 16px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
+        table { border-collapse: collapse; width:100%; margin-top:10px; }
+        th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+        tr:nth-child(even){ background-color:#f2f2f2; }
+        button { margin-bottom:10px; }
     </style>
 </head>
 
@@ -55,9 +55,8 @@
     <main id="container">
         <div id="table">
 
-            <h2>Soccer Field List</h2>
-            <button onclick="sortTable()">Sort by id</button>
-            
+            <h2>Seattle Soccer Fields</h2>
+            <button onclick="sortTableByName()">Sort by Name</button>            
 
             <table>
                 <tr>
@@ -76,7 +75,7 @@
             'pk.eyJ1IjoicGhpbGlwa2xlZW1hbm4yIiwiYSI6ImNtaDU3MGh0djAydjYybnBtZGRqODBxYzEifQ.Gm9MNfRsoFJpxa7vl8SSbA';
         const map = new mapboxgl.Map({
             container: 'map', // container ID
-            style: 'mapbox://styles/mapbox/satellite-v9', // style URL
+            style: 'mapbox://styles/mapbox/satellite-streets-v10', // style URL
             zoom: 10, // starting zoom
             center: [-122.3321, 47.6062] // starting center
         });
@@ -141,7 +140,7 @@
                     'source': 'seattle',
                     'paint': {
                         'fill-color': '#ff8000', // orange color fill
-                        'fill-opacity': 0.4
+                        'fill-opacity': 0.325
                     }
                 });
 
@@ -157,6 +156,9 @@
                     'source': 'soccer',
                     'paint': {
                         'circle-color': '#0080ff', // blue color fill
+                        'circle-radius': 5,
+                        'circle-stroke-width': 1,
+                        'circle-stroke-color': 'white'
                     }
                 });
             });
@@ -173,40 +175,36 @@
 
 
 
-        function sortTable() {
-            var table, rows, switching, i, x, y, shouldSwitch;
-            table = document.getElementsByTagName("table")[0];
-            switching = true;
-            /*Make a loop that will continue until
-            no switching has been done:*/
-            while (switching) {
-                //start by saying: no switching is done:
-                switching = false;
-                rows = table.rows;
-                /*Loop through all table rows (except the
-                first, which contains table headers):*/
-                for (i = 1; i < (rows.length - 1); i++) {
-                    //start by saying there should be no switching:
-                    shouldSwitch = false;
-                    /*Get the two elements you want to compare,
-                    one from current row and one from the next:*/
-                    x = parseFloat(rows[i].getElementsByTagName("td")[1].innerHTML);
-                    y = parseFloat(rows[i + 1].getElementsByTagName("td")[1].innerHTML);
-                    //check if the two rows should switch place:
-                    if (x < y) {
-                        //if so, mark as a switch and break the loop:
-                        shouldSwitch = true;
-                        break;
-                    }
-                }
-                if (shouldSwitch) {
-                    /*If a switch has been marked, make the switch
-                    and mark that a switch has been done:*/
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                }
+    function sortTableByName() {
+    var table, rows, switching, i, x, y, shouldSwitch;
+    table = document.getElementsByTagName("table")[0];
+    switching = true;
+
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+
+            // Get the text content of the Name column (2nd column, index 1)
+            x = rows[i].getElementsByTagName("td")[1].textContent.toLowerCase();
+            y = rows[i + 1].getElementsByTagName("td")[1].textContent.toLowerCase();
+
+            // Compare alphabetically
+            if (x > y) {  
+                shouldSwitch = true;
+                break;
             }
         }
+
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+        }
+    }
+}
+
     </script>
 
 </body>
