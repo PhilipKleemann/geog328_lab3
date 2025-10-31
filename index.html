@@ -55,15 +55,15 @@
     <main id="container">
         <div id="table">
 
-            <h2>Earthquake List</h2>
-            <button onclick="sortTable()">Sort by Magnitude</button>
+            <h2>Soccer Field List</h2>
+            <button onclick="sortTable()">Sort by id</button>
             
 
             <table>
                 <tr>
                     <th>id</th>
-                    <th>magnitude</th>
-                    <th>timestamp</th>
+                    <th>Name</th>
+                    <th>Surface Type</th>
                 </tr>
             </table>
 
@@ -77,38 +77,38 @@
         const map = new mapboxgl.Map({
             container: 'map', // container ID
             style: 'mapbox://styles/mapbox/satellite-v9', // style URL
-            zoom: 5.5, // starting zoom
-            center: [138.043, 38] // starting center
+            zoom: 10, // starting zoom
+            center: [-122.3321, 47.6062] // starting center
         });
 
 
         async function geojsonFetch() {
 
 
-            let response = await fetch('assets/earthquakes.geojson');
+            let response = await fetch('assets/seattle.geojson');
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            let earthquakes = await response.json();
+            let seattle = await response.json();
 
 
-            response = await fetch('assets/japan.json');
+            response = await fetch('assets/soccer.geojson');
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            let japan = await response.json();
+            let soccer = await response.json();
 
 
             var table = document.getElementsByTagName("table");
-            for (let i = 0; i < earthquakes.features.length; i++) {
+            for (let i = 0; i < soccer.features.length; i++) {
                 // console.log(earthquakes.features[i].properties.id);
 
-                var lng = await earthquakes.features[i].geometry.coordinates[0];
-                var lat = await earthquakes.features[i].geometry.coordinates[1];
+                var lng = await soccer.features[i].geometry.coordinates[0];
+                var lat = await soccer.features[i].geometry.coordinates[1];
 
                 // Create an empty <tr> element and add it to the 1st position of the table:
                 var row = table[0].insertRow(-1);
@@ -116,9 +116,10 @@
                 var cell1 = row.insertCell(0);
                 var cell2 = row.insertCell(1);
                 var cell3 = row.insertCell(2);
-                cell1.innerHTML = await earthquakes.features[i].properties.id;
-                cell2.innerHTML = await earthquakes.features[i].properties.mag;
-                cell3.innerHTML = await new Date(earthquakes.features[i].properties.time).toLocaleDateString("en-US");
+                cell1.innerHTML = await soccer.features[i].properties.OBJECTID;
+                cell2.innerHTML = await soccer.features[i].properties.NAME;
+                cell3.innerHTML = await soccer.features[i].properties.E_SURFACE;
+
 
             }
 
@@ -129,44 +130,35 @@
 
 
 
-                map.addSource('earthquakes', {
+                map.addSource('seattle', {
                     type: 'geojson',
-                    data: earthquakes
+                    data: seattle
                 });
 
                 map.addLayer({
-                    'id': 'earthquakes-layer',
-                    'type': 'circle',
-                    'source': 'earthquakes',
-                    'paint': {
-                        'circle-radius': 8,
-                        'circle-stroke-width': 2,
-                        'circle-color': 'red',
-                        'circle-stroke-color': 'white'
-                    }
-                });
-
-
-                map.addSource('japan', {
-                    type: 'geojson',
-                    data: japan
-                });
-
-                map.addLayer({
-                    'id': 'japan-layer',
+                    'id': 'seattle-layer',
                     'type': 'fill',
-                    'source': 'japan',
+                    'source': 'seattle',
                     'paint': {
-                        'fill-color': '#0080ff', // blue color fill
-                        'fill-opacity': 0.5
+                        'fill-color': '#ff8000', // orange color fill
+                        'fill-opacity': 0.4
                     }
                 });
 
 
+                map.addSource('soccer', {
+                    type: 'geojson',
+                    data: soccer
+                });
 
-
-
-
+                map.addLayer({
+                    'id': 'soccer-layer',
+                    'type': 'circle',
+                    'source': 'soccer',
+                    'paint': {
+                        'circle-color': '#0080ff', // blue color fill
+                    }
+                });
             });
 
 
